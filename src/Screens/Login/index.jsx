@@ -1,98 +1,113 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import io from 'socket.io-client';
+import React, { useEffect, useState } from "react";
+import { View, Text, TextInput, Button, TouchableOpacity, ScrollView } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useForm, Controller } from "react-hook-form";
+import io from "socket.io-client";
+import styles, { InputForm, InputLabel, LoginContainer, TecladoView } from "./styles"; // 
+import { ButtonAction } from "../../components/Button";
 
 export default function LoginScreen() {
-    const navigation = useNavigation()
+  const navigation = useNavigation();
+  const [socket, setSocket] = useState(null);
+  const [message, setMessage] = useState("");
 
-    const [socket, setSocket] = useState(null);
-    const [email, setEmail] = useState('');
-    const [senha, setSenha] = useState('');
-    const [message, setMessage] = useState('');
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-    useEffect(() => {
-        // Estabelece a conexão com o servidor Socket.io
-        const newSocket = io('http://192.168.1.53:8082'); 
+  useEffect(() => {
+    const newSocket = io("http://192.168.1.52:8082");
 
-        newSocket.on('connect', () => {
-            console.log('Conectado ao servidor Socket.io');
-            setSocket(newSocket);
-        });
+    newSocket.on("connect", () => {
+      console.log("Conectado ao servidor Socket.io");
+      setSocket(newSocket);
+    });
 
-        newSocket.on('loginResponse', (data) => {
-            setMessage(data.message);
+    newSocket.on("loginResponse", (data) => {
+      setMessage(data.message);
 
-            if (data.success) {
-                // Caso o login seja bem-sucedido, você pode navegar para outra tela
-                console.log('Login bem-sucedido:', data);
-                // Exemplo: navegação para outra tela usando React Navigation
-                navigation.navigate('Tabs', { userId: data.eleitorId });
-            } else {
-                console.log('Falha no login:', data.message);
-            }
-        });
+      if (data.success) {
+        console.log("Login bem-sucedido:", data);
+        navigation.navigate("Tabs", { userId: data.eleitorId });
+      } else {
+        console.log("Falha no login:", data.message);
+      }
+    });
 
-        newSocket.on('disconnect', () => {
-            console.log('Desconectado do servidor Socket.io');
-        });
+    newSocket.on("disconnect", () => {
+      console.log("Desconectado do servidor Socket.io");
+    });
 
-        // Desconecta o socket quando o componente é desmontado
-        return () => {
-            newSocket.disconnect();
-        };
-    }, []);
-
-    const handleLogin = () => {
-        if (socket) {
-            // Emite o evento de login com as credenciais do usuário
-            socket.emit('loginEleitor', { email, senha });
-        } else {
-            setMessage('Não foi possível conectar ao servidor.');
-        }
+    return () => {
+      newSocket.disconnect();
     };
+  }, []);
 
-    return (
-        <View style={styles.container}>
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Senha"
-                value={senha}
-                onChangeText={setSenha}
-                secureTextEntry
-            />
-            <Button title="Login" onPress={handleLogin} />
-            {message && <Text style={styles.message}>{message}</Text>}
-        </View>
-    );
+  const handleLogin = (data) => {
+    if (socket) {
+      socket.emit("loginEleitor", data);
+    } else {
+      setMessage("Não foi possível conectar ao servidor.");
+    }
+  };
+
+  return (
+    <LoginContainer>
+      <TecladoView>
+      <ScrollView>
+      <InputLabel>E-mail</InputLabel>
+      <Controller
+        control={control}
+        name="email"
+        rules={{ required: "Email é obrigatório" }}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputForm
+            placeholder="Digite seu e-mail"
+            placeholderTextColor={'#C4C4CC'}
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+          />
+        )}
+      />
+      {errors.email && <Text>{errors.email.message}</Text>}
+      </ScrollView>
+      <ScrollView>
+      <InputLabel>Senha</InputLabel>
+      <Controller
+        control={control}
+        name="senha"
+        rules={{ required: "Senha é obrigatória" }}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputForm
+            placeholder="Digite sua senha"
+            placeholderTextColor={'#C4C4CC'}
+            secureTextEntry
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+          />
+        )}
+      />
+      {errors.senha && <Text>{errors.senha.message}</Text>}
+      </ScrollView>
+
+      <ButtonAction
+      title="Login" 
+      onPress={handleSubmit(handleLogin)} />
+      
+
+      {message ? <Text>{message}</Text> : null}
+
+      <ScrollView>
+        <Text>Não possui conta?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+          <Text>Clique aqui</Text>
+        </TouchableOpacity>
+      </ScrollView>
+      </TecladoView>
+    </LoginContainer>
+  );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    input: {
-        width: '100%',
-        padding: 10,
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-    },
-    message: {
-        marginTop: 20,
-        color: 'red',
-        fontSize: 16,
-    },
-});
