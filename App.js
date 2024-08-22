@@ -5,6 +5,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ThemeProvider } from "styled-components";
 import theme from "./src/global/styles/theme";
+///<Stack.Screen name="Login" component={LoginScreen} />
+
 
 export default function App() {
 
@@ -14,7 +16,6 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Tabs" component={MyRoutes} />
         </Stack.Navigator>
       </NavigationContainer>

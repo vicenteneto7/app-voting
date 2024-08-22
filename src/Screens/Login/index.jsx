@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, TouchableOpacity, ScrollView } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useTheme } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
 import io from "socket.io-client";
 import styles, { InputForm, InputLabel, LoginContainer, TecladoView } from "./styles"; // 
 import { ButtonAction } from "../../components/Button";
 
 export default function LoginScreen() {
+  const theme = useTheme()
   const navigation = useNavigation();
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
@@ -18,7 +19,7 @@ export default function LoginScreen() {
   } = useForm();
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.52:8082");
+    const newSocket = io("http://192.168.1.53:8082");
 
     newSocket.on("connect", () => {
       console.log("Conectado ao servidor Socket.io");
