@@ -1,13 +1,16 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import HomeScreen from '../Screens/Home';
 import VotesScreen from '../Screens/Votes';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
+import CandidatesScreen from '../Screens/Candidates';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
-export function MyRoutes() {
+export function AppRoutes() {
   const theme = useTheme()
 
   return (
@@ -35,7 +38,7 @@ export function MyRoutes() {
        }}
        />
       <Tab.Screen 
-      name="Meus votos" 
+      name="Votação" 
       component={VotesScreen}
       options={{
         tabBarIcon: (({ size, color }) => 
@@ -48,5 +51,14 @@ export function MyRoutes() {
        }} 
       />  
     </Tab.Navigator>
+  );
+}
+
+export function StackNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="VotingScreen" component={CandidatesScreen} />
+      <Stack.Screen name="VotesScreen" component={VotesScreen} />
+    </Stack.Navigator>
   );
 }
