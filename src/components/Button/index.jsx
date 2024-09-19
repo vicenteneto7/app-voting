@@ -1,3 +1,4 @@
+import { TouchableOpacity } from 'react-native';
 import { ButtonText, ContainerButton, LoginButtonContainer } from './styles'
 
 export const ButtonAction = ({ title, onPress, backgroundColor, color, width, marginTop }) => {

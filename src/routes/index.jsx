@@ -10,7 +10,7 @@ export function Routes() {
 
   return (
     <NavigationContainer>
-      <AppRoutes /> 
+      {eleitorData.eleitorId ? <AppRoutes /> : <AuthRoutes />}  
     </NavigationContainer>
   );
 }

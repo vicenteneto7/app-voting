@@ -5,8 +5,10 @@ import { useForm, Controller } from "react-hook-form";
 import io from "socket.io-client";
 import styles, { InputForm, InputLabel, LoginContainer, TecladoView } from "./styles"; // 
 import { ButtonAction } from "../../components/Button";
+import { useEleitor } from "../../hooks/auth";
 
 export default function LoginScreen() {
+  const { putEleitorData } = useEleitor(); // Pega a função para salvar o eleitor
   const theme = useTheme()
   const navigation = useNavigation();
   const [socket, setSocket] = useState(null);
@@ -19,7 +21,7 @@ export default function LoginScreen() {
   } = useForm();
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.53:8082");
+    const newSocket = io("http://192.168.1.52:8082");
 
     newSocket.on("connect", () => {
       console.log("Conectado ao servidor Socket.io");
@@ -31,7 +33,7 @@ export default function LoginScreen() {
 
       if (data.success) {
         console.log("Login bem-sucedido:", data);
-        navigation.navigate("Tabs", { userId: data.eleitorId });
+        putEleitorData(data);
       } else {
         console.log("Falha no login:", data.message);
       }

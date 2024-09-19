@@ -1,6 +1,7 @@
+import { TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native'
 
-export const LoginButtonContainer = styled.TouchableOpacity`
+export const LoginButtonContainer = styled(TouchableOpacity)`
   background: ${(props) => props.theme['purple']};
 
   height: 40px;

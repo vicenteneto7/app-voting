@@ -7,5 +7,9 @@ export const HomeContainer = styled.View`
   justify-content: center;
   gap: 10px;
 
-  background-color: ${(props) => props.theme["gray-900"]};
+  background-color: ${(props) => props.theme["white"]};
 `;
+
+export const P = styled.Text`
+  color: ${(props) => props.theme["black"]};
+`
