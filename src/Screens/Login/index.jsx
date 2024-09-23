@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Button, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { useNavigation, useTheme } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
 import io from "socket.io-client";
-import styles, { InputForm, InputLabel, LoginContainer, TecladoView } from "./styles"; // 
+import styles, {
+  InputForm,
+  InputLabel,
+  LoginContainer,
+  TecladoView,
+} from "./styles";
 import { ButtonAction } from "../../components/Button";
 import { useEleitor } from "../../hooks/auth";
+import Toast from "react-native-toast-message"; // Importe o Toast
 
 export default function LoginScreen() {
   const { putEleitorData } = useEleitor(); // Pega a função para salvar o eleitor
-  const theme = useTheme()
+  const theme = useTheme();
   const navigation = useNavigation();
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
@@ -21,7 +34,7 @@ export default function LoginScreen() {
   } = useForm();
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.52:8082");
+    const newSocket = io("http://192.168.1.53:8082");
 
     newSocket.on("connect", () => {
       console.log("Conectado ao servidor Socket.io");
@@ -34,8 +47,27 @@ export default function LoginScreen() {
       if (data.success) {
         console.log("Login bem-sucedido:", data);
         putEleitorData(data);
+
+        // Exibe o Toast de sucesso
+        Toast.show({
+          type: "success",
+          text1: "Login bem-sucedido!",
+          text2: "Você foi autenticado com sucesso.",
+          visibilityTime: 4000, // Tempo de exibição
+        });
+        // Navega para outra tela após o login bem-sucedido, se necessário
+        // navigation.navigate('SomeScreen');
       } else {
         console.log("Falha no login:", data.message);
+
+        // Exibe o Toast de erro
+        Toast.show({
+          type: "error",
+          text1: "Falha no login",
+          text2: data.message || "Não foi possível realizar o login.",
+          position: 'top', // 'top' ou 'bottom'
+          visibilityTime: 4000, // Tempo de exibição
+        });
       }
     });
 
@@ -59,57 +91,56 @@ export default function LoginScreen() {
   return (
     <LoginContainer>
       <TecladoView>
-      <ScrollView>
-      <InputLabel>E-mail</InputLabel>
-      <Controller
-        control={control}
-        name="email"
-        rules={{ required: "Email é obrigatório" }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <InputForm
-            placeholder="Digite seu e-mail"
-            placeholderTextColor={'#C4C4CC'}
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
+        <ScrollView>
+          <InputLabel>E-mail</InputLabel>
+          <Controller
+            control={control}
+            name="email"
+            rules={{ required: "Email é obrigatório" }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <InputForm
+                placeholder="Digite seu e-mail"
+                placeholderTextColor={"#C4C4CC"}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
           />
-        )}
-      />
-      {errors.email && <Text>{errors.email.message}</Text>}
-      </ScrollView>
-      <ScrollView>
-      <InputLabel>Senha</InputLabel>
-      <Controller
-        control={control}
-        name="senha"
-        rules={{ required: "Senha é obrigatória" }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <InputForm
-            placeholder="Digite sua senha"
-            placeholderTextColor={'#C4C4CC'}
-            secureTextEntry
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
+          {errors.email && <Text>{errors.email.message}</Text>}
+        </ScrollView>
+
+        <ScrollView>
+          <InputLabel>Senha</InputLabel>
+          <Controller
+            control={control}
+            name="senha"
+            rules={{ required: "Senha é obrigatória" }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <InputForm
+                placeholder="Digite sua senha"
+                placeholderTextColor={"#C4C4CC"}
+                secureTextEntry
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
           />
-        )}
-      />
-      {errors.senha && <Text>{errors.senha.message}</Text>}
-      </ScrollView>
+          {errors.senha && <Text>{errors.senha.message}</Text>}
+        </ScrollView>
 
-      <ButtonAction
-      title="Login" 
-      onPress={handleSubmit(handleLogin)} />
-      
+        <ButtonAction title="Login" onPress={handleSubmit(handleLogin)} />
 
-      {message ? <Text>{message}</Text> : null}
+        {message ? <Text>{message}</Text> : null}
 
-      <ScrollView>
-        <Text>Não possui conta?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-          <Text>Clique aqui</Text>
-        </TouchableOpacity>
-      </ScrollView>
+        <ScrollView>
+          <Text>Não possui conta?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+            <Text>Clique aqui</Text>
+          </TouchableOpacity>
+        </ScrollView>
+        <Toast />
       </TecladoView>
     </LoginContainer>
   );

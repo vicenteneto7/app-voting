@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import io from "socket.io-client";
 import { useEleitor } from "../../hooks/auth";
+import Toast from "react-native-toast-message";
 
 export default function CandidatesScreen() {
   const { eleitorData } = useEleitor();
@@ -16,10 +17,10 @@ export default function CandidatesScreen() {
   const [candidates, setCandidates] = useState([]);
   const [message, setMessage] = useState("");
   const [hasVoted, setHasVoted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Para controlar o estado de envio
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.52:8082");
+    const newSocket = io("http://192.168.1.53:8082");
 
     newSocket.on("connect", () => {
       console.log("Conectado ao servidor Socket.io");
@@ -41,12 +42,22 @@ export default function CandidatesScreen() {
 
     newSocket.on("voteResponse", (data) => {
       if (data.success) {
-        setMessage("Voto registrado com sucesso!");
+        // Exibe o toast de sucesso
+        Toast.show({
+          type: "success",
+          text1: "Voto Registrado!",
+          text2: "Seu voto foi registrado com sucesso.",
+        });
         setHasVoted(true);
       } else {
-        setMessage(data.message);
+        // Exibe o toast de erro
+        Toast.show({
+          type: "error",
+          text1: "Erro ao votar",
+          text2: data.message || "Algo deu errado ao tentar registrar o voto.",
+        });
       }
-      setIsSubmitting(false); // Finaliza o estado de envio
+      setIsSubmitting(false);
     });
 
     return () => {
@@ -57,8 +68,8 @@ export default function CandidatesScreen() {
   const handleVote = (candidateId) => {
     if (socket) {
       const id_eleitor = eleitorData.eleitorId;
-      setIsSubmitting(true); // Inicia o estado de envio
-      socket.emit("vote", ({ id_eleitor, id_candidato: candidateId }));
+      setIsSubmitting(true);
+      socket.emit("vote", { id_eleitor, id_candidato: candidateId });
       console.log(`Votou no candidato ${candidateId}`);
     } else {
       setMessage("Erro: Não foi possível se conectar ao servidor.");
@@ -69,13 +80,18 @@ export default function CandidatesScreen() {
     <View style={styles.container}>
       <Text style={styles.header}>Candidatos</Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
-      {isSubmitting ? <Text style={styles.submitting}>Enviando voto...</Text> : null}
+      {isSubmitting ? (
+        <Text style={styles.submitting}>Enviando voto...</Text>
+      ) : null}
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {candidates.length > 0 ? (
           candidates.map((candidate) => (
             <View key={candidate.id_candidato} style={styles.card}>
-              <Image source={require('../../assets/user.png')} style={styles.avatar} />
+              <Image
+                source={require("../../assets/user.png")}
+                style={styles.avatar}
+              />
               <View style={styles.textContainer}>
                 <Text style={styles.name}>{candidate.nome}</Text>
                 <Text style={styles.party}>{candidate.partido}</Text>
@@ -83,6 +99,7 @@ export default function CandidatesScreen() {
               <TouchableOpacity
                 style={styles.button}
                 onPress={() => handleVote(candidate.id_candidato)}
+                disabled={isSubmitting || hasVoted} // Desabilitar o botão se já votou ou está enviando
               >
                 <Text style={styles.buttonText}>Votar</Text>
               </TouchableOpacity>
@@ -92,6 +109,9 @@ export default function CandidatesScreen() {
           <Text style={styles.noCandidates}>Nenhum candidato disponível.</Text>
         )}
       </ScrollView>
+
+      {/* Exibir o Toast */}
+      <Toast />
     </View>
   );
 }
@@ -101,7 +121,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: "#fff",
-    justifyContent: 'center'
+    justifyContent: "center",
   },
   scrollContainer: {
     paddingBottom: 20,
@@ -136,7 +156,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   textContainer: {
-    flex: 1, // Ocupa o espaço restante ao lado da imagem
+    flex: 1,
     marginLeft: 16,
   },
   name: {
@@ -161,7 +181,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 50,
     height: 50,
-    borderRadius: 25, // Para deixar a imagem circular
+    borderRadius: 25,
   },
   noCandidates: {
     textAlign: "center",
