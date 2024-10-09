@@ -11,6 +11,8 @@ import { useNavigation, useTheme } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
 import io from "socket.io-client";
 import styles, {
+  ErrorMessage,
+  InputContainer,
   InputForm,
   InputLabel,
   LoginContainer,
@@ -65,7 +67,7 @@ export default function LoginScreen() {
           type: "error",
           text1: "Falha no login",
           text2: data.message || "Não foi possível realizar o login.",
-          position: 'top', // 'top' ou 'bottom'
+          position: "top", // 'top' ou 'bottom'
           visibilityTime: 4000, // Tempo de exibição
         });
       }
@@ -91,48 +93,54 @@ export default function LoginScreen() {
   return (
     <LoginContainer>
       <TecladoView>
-        <ScrollView>
-          <InputLabel>E-mail</InputLabel>
-          <Controller
-            control={control}
-            name="email"
-            rules={{ required: "Email é obrigatório" }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <InputForm
-                placeholder="Digite seu e-mail"
-                placeholderTextColor={"#C4C4CC"}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <InputContainer>
+            <InputLabel>E-mail</InputLabel>
+            <Controller
+              control={control}
+              name="email"
+              rules={{ required: "Email é obrigatório" }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <InputForm
+                  placeholder="Digite seu e-mail"
+                  placeholderTextColor={"#C4C4CC"}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+            />
+            {errors.email && (
+              <ErrorMessage>{errors.email.message}</ErrorMessage>
             )}
-          />
-          {errors.email && <Text>{errors.email.message}</Text>}
+          </InputContainer>
         </ScrollView>
 
-        <ScrollView>
-          <InputLabel>Senha</InputLabel>
-          <Controller
-            control={control}
-            name="senha"
-            rules={{ required: "Senha é obrigatória" }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <InputForm
-                placeholder="Digite sua senha"
-                placeholderTextColor={"#C4C4CC"}
-                secureTextEntry
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <InputContainer>
+            <InputLabel>Senha</InputLabel>
+            <Controller
+              control={control}
+              name="senha"
+              rules={{ required: "Senha é obrigatória" }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <InputForm
+                  placeholder="Digite sua senha"
+                  placeholderTextColor={"#C4C4CC"}
+                  secureTextEntry
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+            />
+            {errors.senha && (
+              <ErrorMessage>{errors.senha.message}</ErrorMessage>
             )}
-          />
-          {errors.senha && <Text>{errors.senha.message}</Text>}
+          </InputContainer>
         </ScrollView>
 
         <ButtonAction title="Login" onPress={handleSubmit(handleLogin)} />
-
-        {message ? <Text>{message}</Text> : null}
 
         <ScrollView>
           <Text>Não possui conta?</Text>

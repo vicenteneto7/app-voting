@@ -34,6 +34,17 @@ export const InputForm = styled.TextInput`
   border-radius: 3px;
 `;
 
+export const InputContainer = styled.View`
+ display: flex;
+ flex-direction: column;
+ align-items: start;
+ justify-content: center;
+`;
+
+export const ErrorMessage = styled.Text`
+  color: ${(props) => props.theme["red-500"]};
+`
+
 export const InputLabel = styled.Text`
   font-size: 14px;
   color: ${(props) => props.theme["gray-300"]};
